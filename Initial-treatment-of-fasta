@@ -1,0 +1,4 @@
+Bash script (not shown herein) to initial treatment of fasta files.
+This script filters empty files and replaces eventual ambiguity sites and gaps by “N”.
+
+Elaborated by P.P.G. Taucce, in preparation.
