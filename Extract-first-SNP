@@ -1,0 +1,50 @@
+import argparse
+from collections import defaultdict
+import os
+import sys
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-p', '--pos', type=int, default=0)
+parser.add_argument('-o', '--output', default='table.txt')
+parser.add_argument('inputs', nargs='+')
+args = parser.parse_args()
+
+mapping = {
+  'A': 1,
+  'C': 2,
+  'G': 3,
+  'T': 4,
+  'N': -1,
+}
+
+snps = defaultdict(dict)
+loci = set()
+for inp in args.inputs:
+    locus = os.path.splitext(os.path.basename(inp))[0]
+    loci.update([locus])
+    with open(inp, 'r') as input_data:
+        n_taxa, n_loci = [int(i) for i in next(input_data).split()]
+
+        for line in input_data:
+            seq_id, seq = line.split()
+            snps[seq_id][locus] = seq[args.pos]
+
+path = os.path.dirname(args.output)
+try:
+    os.makedirs(path)
+except OSError:
+    if not os.path.isdir(path):
+        raise
+
+with open(args.output, 'w') as output:
+    sorted_loci = list(sorted(loci))
+    output.write('\t'.join(['Taxa'] + sorted_loci) + '\n')
+    for id in snps:
+        output.write('{}'.format(id))
+        for locus in sorted_loci:
+            if locus in snps[id]:
+                #output.write('\t{}'.format(snps[id][locus]))
+                output.write('\t{}'.format(mapping[snps[id][locus]]))
+            else:
+                output.write('\t-1')
+        output.write('\n')
